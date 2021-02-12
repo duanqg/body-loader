@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mapbox GL JS debug page</title>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        body { margin: 0; padding: 0; }
+        #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+    </style>
+</head>
+
+<body>
+
+<div id='map'></div>
+
+
+<script src='./src/mapbox-gl.js'></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.0.1/mapbox-gl.css"/>
+<script src="https://unpkg.com/three@0.106.2/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.106.2/examples/js/loaders/GLTFLoader.js"></script>
+
+<script src="src/gltfLayer.js"></script>
+<script src="./src/gltf-util.js"></script>
+<script src="./data/information.js"></script>
+<script>
+    mapboxgl.accessToken ='pk.eyJ1IjoiZHVhbnFpZ2VuZyIsImEiOiJja2p0bnRvZTYwNGtoMnpvODFrdThsaWMzIn0.bg6lSpmT-BNceQnqSk_q_g';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: './data/style.json',
+        zoom: 16,
+        center: [116.3184590395457, 39.99934061384263],
+        pitch: 0,
+        bearing: 0
+    });
+
+    map.setMaxZoom(25)
+    let click = {};
+    let getBuild, getBack, getBody, getHair, getCloth;
+
+    map.transform._maxPitch = 89;
+
+    var scenes = []
+
+    map.on('load', function () {
+        map.addSource('point', {
+            'type': 'geojson',
+            'data': geojson
+        });
+        map.addLayer({
+            'id': 'points',
+            'type': 'symbol',
+            'source': 'point',
+            "minzoom": 13,
+            'maxzoom': 16.5,
+            'layout': {
+                'icon-image': 'custom-marker',
+                'text-field': ['get', 'title'],
+                'text-font': [
+                    'Open Sans Semibold',
+                    'Arial Unicode MS Bold'
+                ],
+                'text-offset': [0, 1],
+                'text-anchor': 'top'
+            }
+        });
+
+        for(var i = 0; i < customLayer.length; i++){
+            map.addLayer(new gltfLayer(customLayer[i]));
+        }
+        getBuild = map.getLayer('build');
+        getBack = map.getLayer('back');
+        getBody = map.getLayer('body');
+        getHair = map.getLayer('hair');
+        getCloth = map.getLayer('cloth');
+    });
+
+
+    map.on('click', function (e) {
+        var a = map.queryRenderedFeatures(e.point, {layers:['points']})
+        if (a.length >= 1) {
+            click = a[0].properties;
+            var anchor = JSON.parse(click.anchor);
+            var camera = JSON.parse(click.camera);
+            setCameraFrom3DtoMapbox(anchor, camera[0])
+
+            visibleGLTFChildren(getBuild, true, [click.name]);
+            visibleGLTFChildren(getBack, true, [click.name + '_back']);
+
+            visibleGLTFChildren(getBody, true);
+            visibleGLTFChildren(getCloth, true);
+            visibleGLTFChildren(getHair, true);
+
+            const pose_trans = JSON.parse(click.pose);
+            transformGLTFChildren(getBody, pose_trans[0]);
+            transformGLTFChildren(getCloth, pose_trans[0]);
+            transformGLTFChildren(getHair, pose_trans[0]);
+            map.triggerRepaint();
+        }
+    });
+
+</script>
+</body>
+</html>

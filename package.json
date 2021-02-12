@@ -1,0 +1,23 @@
+{
+  "name": "body-loader",
+  "version": "1.0.0",
+  "description": "A ThreeJS-GLTF body loader",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/duanqg/body-loader.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/duanqg/body-loader/issues"
+  },
+  "homepage": "https://github.com/duanqg/body-loader#readme",
+  "dependencies": {
+    "three": "^0.125.2"
+  }
+}
